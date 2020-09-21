@@ -7,6 +7,9 @@ namespace App\Controller;
 
 class HelloController extends AbstractController
 {
+	/**
+	* @Route("/hello",name="hello")
+	*/
 	public function index()
 	{
 		return new Response('Hello Symfony!');
