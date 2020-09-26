@@ -17,20 +17,24 @@ class HelloController extends AbstractController
     */
     public function index(Request $request)
     {
-        $person=new Person();
+        $person=new Person();//Personのsetterメソッドでは最後にreturn $thisをつけてインスタンス自身を返すようにしているので、メソッドチェーンとして記述することが出来る。
         $person->setName('taro')
         ->setAge(36)
         ->setMail('taro@yamada.kun');
         $form=$this->createFormBuilder($person)
+        //createFormBuilderを呼び出す際、引数にPersonインスタンスが設定されている。これにより、$personの値を保持するカタチでFormInterfaceが形成されいてる。
+        //そのためには、引数に使うクラスに用意されているプロパティとaddする項目の整合性が取れていなければならない。各項目の名前と値のタイプが合致していなければ、引数のインスタンスの値をそのままフォームに設定できないので注意。
         ->add('name',TextType::class)
         ->add('age',IntegerType::class)
         ->add('mail',EmailType::class)
         ->add('save',SubmitType::class,['label'=>'click'])
         ->getForm();
-
+        //POST送信された際の処理
         if($request->getMethod()=='POST'){
             $form->handleRequest($request);
+            //handleRequest でRequestとハンドリングしたあと、フォームの値を取得している
             $obj=$form->getData();
+            //まず、$formのgetDataを呼び出している。これにより$formからPersonインスタンスが呼び出せる
             $msg='Name: '.$obj->getName().'<br>'
                 .'Age: '.$obj->getAge().'<br>'
                 .'Mail: '.$obj->getMail();
