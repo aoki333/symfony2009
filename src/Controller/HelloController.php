@@ -3,82 +3,52 @@
 namespace App\Controller;
  use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
  use Symfony\Component\HttpFoundation\Request;
+ use Symfony\Component\HttpFoundation\Response;
  use Symfony\Component\Routing\Annotation\Route;
-
  use Symfony\Component\Form\Extension\Core\Type\TextType;
- use Symfony\Component\Form\Extension\Core\Type\EmailType;
- use Symfony\Component\Form\Extension\Core\Type\IntegerType;
  use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+ use Symfony\Component\HttpFoundation\Session\SessionInterface;
 
 class HelloController extends AbstractController
 {
     /**
     * @Route("/hello",name="hello")
     */
-    public function index(Request $request)
+    public function index(Request $request,SessionInterface $session)
     {
-        $person=new Person();//Personのsetterメソッドでは最後にreturn $thisをつけてインスタンス自身を返すようにしているので、メソッドチェーンとして記述することが出来る。
-        $person->setName('taro')
-        ->setAge(36)
-        ->setMail('taro@yamada.kun');
-        $form=$this->createFormBuilder($person)
-        //createFormBuilderを呼び出す際、引数にPersonインスタンスが設定されている。これにより、$personの値を保持するカタチでFormInterfaceが形成されいてる。
-        //そのためには、引数に使うクラスに用意されているプロパティとaddする項目の整合性が取れていなければならない。各項目の名前と値のタイプが合致していなければ、引数のインスタンスの値をそのままフォームに設定できないので注意。
-        ->add('name',TextType::class)
-        ->add('age',IntegerType::class)
-        ->add('mail',EmailType::class)
-        ->add('save',SubmitType::class,['label'=>'click'])
-        ->getForm();
-        //POST送信された際の処理
-        if($request->getMethod()=='POST'){
-            $form->handleRequest($request);
-            //handleRequest でRequestとハンドリングしたあと、フォームの値を取得している
-            $obj=$form->getData();
-            //まず、$formのgetDataを呼び出している。これにより$formからPersonインスタンスが呼び出せる
-            $msg='Name: '.$obj->getName().'<br>'
-                .'Age: '.$obj->getAge().'<br>'
-                .'Mail: '.$obj->getMail();
+       $data=new MyData();
+       $form=$this->createFormBuilder($data)
+       ->add('data',TextType::class)
+       ->add('save',submitType::class,['label'=>'click'])
+       ->getForm();
+
+       if($request->getMethod()=='POST'){
+        $form->handleRequest($request);
+        $data=$form->getData();
+        if($data->getData()=='!'){
+            $session->remove('data');
         }else{
-            $msg='お名前をどうぞ！';
+            $session->set('data',$data->getData());
         }
-        return $this->render('hello/index.html.twig',[
-            'title'=>'Hello',
-            'message'=>$msg,
-            'form'=>$form->createView(),
-        ]);
+       }
+       return $this->render('hello/index.html.twig',[
+        'title'=>'Hello',
+        'data'=>$session->get('data'),
+        'form'=>$form->createView(),
+    ]);
     }
 }
 //データクラス
-class Person
+class MyData
 {
-    protected $name;
-    protected $age;
-    protected $mail;
+    protected $data='';
 
-    public function getName()
+    public function getData()
     {
-        return $this->name;
+        return $this->data;
     }
-    public function setName($name){
-        $this->name=$name;
-        return $this;
-    }
-    public function getAge()
+    public function setData($data)
     {
-        return $this->age;
-    }
-    public function setAge($age)
-    {
-        $this->age=$age;
-        return $this;
-    }
-    public function getMail()
-    {
-        return $this->mail;
-    }
-    public function setMail($mail)
-    {
-        $this->mail=$mail;
-        return $this;
+        $this->data=$data;
     }
 }
