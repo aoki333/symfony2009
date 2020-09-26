@@ -15,21 +15,7 @@ class HelloController extends AbstractController
     {
        return $this->render('hello/index.html.twig',[
         'title'=>'Hello',
-        'message'=>'これはサンプルのテンプレート画面です。',
+        'message'=>'これはサンプルのテンプレート計算を行います。',
        ]);
-    }
-}
-//データクラス
-class MyData
-{
-    protected $data='';
-
-    public function getData()
-    {
-        return $this->data;
-    }
-    public function setData($data)
-    {
-        $this->data=$data;
     }
 }
