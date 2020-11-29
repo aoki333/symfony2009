@@ -48,12 +48,18 @@ public function find(Request $request)
         ->getRepository(Person::class);
 
 
+    $manager = $this->getDoctrine()->getManager();
+
+
     if ($request->getMethod() == 'POST'){
         $form->handleRequest($request);
         $findstr = $form->getData()->getFind();
-        $result = $repository->findByNameOrMail($findstr);
+        $query = $manager->createQuery(
+            "SELECT p FROM App\Entity\Person p 
+            WHERE p.name = '{$findstr}'");
+        $result = $query->getResult();
     } else {
-        $result = $repository->findAllwithSort(); // ●
+        $result = $repository->findAllwithSort();
     }
     return $this->render('hello/find.html.twig', [
         'title' => 'Hello',
@@ -61,6 +67,9 @@ public function find(Request $request)
         'data' => $result,
     ]);
 }
+
+
+
     /**
      * @Route("/create", name="create")
      */
