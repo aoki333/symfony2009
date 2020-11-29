@@ -44,14 +44,16 @@ public function find(Request $request)
         ->getForm();
 
 
+    $repository = $this->getDoctrine()
+        ->getRepository(Person::class);
+
+
     if ($request->getMethod() == 'POST'){
         $form->handleRequest($request);
         $findstr = $form->getData()->getFind();
-        $repository = $this->getDoctrine()
-            ->getRepository(Person::class);
-        $result = $repository->findByName($findstr); // ●
+        $result = $repository->findByNameOrMail($findstr);
     } else {
-        $result = null;
+        $result = $repository->findAllwithSort(); // ●
     }
     return $this->render('hello/find.html.twig', [
         'title' => 'Hello',
@@ -120,20 +122,20 @@ public function update(Request $request, Person $person)
         ->add('save',SubmitType::class,array('label'=>'Click'))
         ->getForm();
 
-        if($request->getMethod() =='POST'){
-            $form->handleRequest($request);
-            $person = $form->getData();
-            $manager=$this->getDoctrine()->getManager();
-            $manager->remove($person);
-            $manager->flush();
-            return $this->redirect('/hello');
-        }else{
-            return $this->render('hello/create.html.twig',[
-                'title'=>'Hello',
-                'message'=>'Delete Entity id='.$person->getId(),
-                'form'=>$form->createView(),
-            ]);
-        }
+    if($request->getMethod() =='POST'){
+        $form->handleRequest($request);
+        $person = $form->getData();
+        $manager=$this->getDoctrine()->getManager();
+        $manager->remove($person);
+        $manager->flush();
+        return $this->redirect('/hello');
+    }else{
+        return $this->render('hello/create.html.twig',[
+            'title'=>'Hello',
+            'message'=>'Delete Entity id='.$person->getId(),
+            'form'=>$form->createView(),
+        ]);
+    }
  }
 
   
